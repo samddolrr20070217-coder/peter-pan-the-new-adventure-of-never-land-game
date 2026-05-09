@@ -1,1 +1,18 @@
+body{
+  background:#0a1633;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+  margin:0;
+}
 
+h1{
+  color:#7fffd4;
+  margin-top:20px;
+}
+
+canvas{
+  background:black;
+  border:4px solid #7fffd4;
+  margin-top:20px;
+}
