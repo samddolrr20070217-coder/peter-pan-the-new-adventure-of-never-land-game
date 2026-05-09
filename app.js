@@ -1,41 +1,44 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const player = {
-  x:20,
-  y:200,
-  width:20,
-  height:100,
-  speed:6
-};
-
-const enemy = {
-  x:860,
-  y:200,
-  width:20,
-  height:100,
-  speed:4
-};
-
-const ball = {
-  x:450,
-  y:250,
-  radius:12,
-  speedX:5,
-  speedY:4
-};
-
 const keys = {};
 
-document.addEventListener("keydown",(e)=>{
-  keys[e.key]=true;
+document.addEventListener("keydown", (e)=>{
+  keys[e.key] = true;
 });
 
-document.addEventListener("keyup",(e)=>{
-  keys[e.key]=false;
+document.addEventListener("keyup", (e)=>{
+  keys[e.key] = false;
 });
+
+const player = {
+  x:100,
+  y:300,
+  width:50,
+  height:70,
+  speed:5,
+  color:"lime",
+  direction:"right"
+};
+
+const pirates = [
+  {x:700,y:320,width:50,height:70},
+  {x:900,y:320,width:50,height:70}
+];
+
+let cameraX = 0;
 
 function movePlayer(){
+
+  if(keys["ArrowRight"]){
+    player.x += player.speed;
+    player.direction = "right";
+  }
+
+  if(keys["ArrowLeft"]){
+    player.x -= player.speed;
+    player.direction = "left";
+  }
 
   if(keys["ArrowUp"]){
     player.y -= player.speed;
@@ -45,83 +48,146 @@ function movePlayer(){
     player.y += player.speed;
   }
 
-  if(player.y < 0){
-    player.y = 0;
+  if(player.y < 200){
+    player.y = 200;
   }
 
-  if(player.y + player.height > canvas.height){
-    player.y = canvas.height - player.height;
+  if(player.y > 350){
+    player.y = 350;
+  }
+
+  cameraX = player.x - 200;
+}
+
+function drawBackground(){
+
+  ctx.fillStyle = "#5cc8ff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle = "#228B22";
+
+  for(let i=0;i<30;i++){
+    ctx.fillRect(i*200-cameraX,370,120,150);
+  }
+
+  ctx.fillStyle = "#8B4513";
+
+  for(let i=0;i<20;i++){
+    ctx.fillRect(i*250-cameraX,250,40,120);
+
+    ctx.fillStyle = "green";
+    ctx.beginPath();
+    ctx.arc(i*250+20-cameraX,220,50,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "#8B4513";
   }
 }
 
-function moveEnemy(){
+function drawPlayer(){
 
-  if(ball.y < enemy.y + enemy.height/2){
-    enemy.y -= enemy.speed;
-  }else{
-    enemy.y += enemy.speed;
-  }
-}
+  ctx.fillStyle = player.color;
 
-function moveBall(){
-
-  ball.x += ball.speedX;
-  ball.y += ball.speedY;
-
-  if(ball.y < 0 || ball.y > canvas.height){
-    ball.speedY *= -1;
-  }
-
-  if(
-    ball.x - ball.radius < player.x + player.width &&
-    ball.y > player.y &&
-    ball.y < player.y + player.height
-  ){
-    ball.speedX *= -1;
-  }
-
-  if(
-    ball.x + ball.radius > enemy.x &&
-    ball.y > enemy.y &&
-    ball.y < enemy.y + enemy.height
-  ){
-    ball.speedX *= -1;
-  }
-
-  if(ball.x < 0 || ball.x > canvas.width){
-    ball.x = 450;
-    ball.y = 250;
-  }
-}
-
-function draw(){
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle = "lime";
-  ctx.fillRect(player.x,player.y,player.width,player.height);
-
-  ctx.fillStyle = "red";
-  ctx.fillRect(enemy.x,enemy.y,enemy.width,enemy.height);
-
-  ctx.fillStyle = "yellow";
-  ctx.beginPath();
-  ctx.arc(ball.x,ball.y,ball.radius,0,Math.PI*2);
-  ctx.fill();
+  ctx.fillRect(
+    player.x-cameraX,
+    player.y,
+    player.width,
+    player.height
+  );
 
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
+  ctx.fillText(
+    "Peter Pan",
+    player.x-cameraX-10,
+    player.y-10
+  );
+}
 
-  ctx.fillText("Peter Pan",20,30);
-  ctx.fillText("Pirate Captain",700,30);
+function drawPirates(){
+
+  pirates.forEach((pirate)=>{
+
+    ctx.fillStyle = "red";
+
+    ctx.fillRect(
+      pirate.x-cameraX,
+      pirate.y,
+      pirate.width,
+      pirate.height
+    );
+
+    ctx.fillStyle = "white";
+
+    ctx.fillText(
+      "Pirate",
+      pirate.x-cameraX-10,
+      pirate.y-10
+    );
+
+    if(
+      player.x < pirate.x + pirate.width &&
+      player.x + player.width > pirate.x &&
+      player.y < pirate.y + pirate.height &&
+      player.y + player.height > pirate.y
+    ){
+
+      ctx.fillStyle = "yellow";
+      ctx.font = "40px Arial";
+
+      ctx.fillText(
+        "Battle With Pirates!",
+        330,
+        80
+      );
+    }
+
+  });
+}
+
+function drawStoryAreas(){
+
+  ctx.fillStyle = "white";
+  ctx.font = "24px Arial";
+
+  ctx.fillText(
+    "London",
+    100-cameraX,
+    150
+  );
+
+  ctx.fillText(
+    "Lost Boys Camp",
+    900-cameraX,
+    150
+  );
+
+  ctx.fillText(
+    "Tiger Lily Village",
+    1500-cameraX,
+    150
+  );
+
+  ctx.fillText(
+    "Pirate Ship",
+    2200-cameraX,
+    150
+  );
 }
 
 function gameLoop(){
 
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
   movePlayer();
-  moveEnemy();
-  moveBall();
-  draw();
+
+  drawBackground();
+
+  drawStoryAreas();
+
+  drawPirates();
+
+  drawPlayer();
 
   requestAnimationFrame(gameLoop);
 }
